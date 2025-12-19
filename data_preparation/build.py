@@ -131,6 +131,10 @@ def main():
     done_df['Quantity'] = pd.to_numeric(done_df['Quantity'], errors='coerce').fillna(0)
     done_df['Unit'] = done_df['Unit'].str.lower()
     
+    # Normalize Description to lowercase for case-insensitive matching
+    print("\nNormalizing Description column to lowercase...")
+    done_df['Description'] = done_df['Description'].str.lower()
+    
     # Final columns
     final_cols = ['Year', 'Month', 'Direction', 'HS_Code', 'Description', 'Country', 
                   'Value', 'Quantity', 'Unit']
