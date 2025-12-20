@@ -1,0 +1,52 @@
+Convert question to SQL. Return ONLY the SQL query.
+
+TABLE: trade
+COLUMNS: Year, Month, Direction, HS_Code, Description, Country, Value, Quantity, Unit, Revenue
+
+CRITICAL RULES:
+1. Country: ISO-2 codes (IN=India, CN=China, US=USA, AE=UAE, JP=Japan, DE=Germany)
+2. Description: lowercase, use LIKE '%wheat%'
+3. Direction: ONLY 'I' or 'E' (NEVER use 'Both')
+4. Month: 1-12 (Baishakh=1, Jestha=2, Ashoj=6, Kartik=7, Chaitra=12)
+5. Use Value for trade amounts (NOT Revenue unless question asks for duty/revenue)
+6. Revenue ONLY for import duty questions
+7. NO aliases, NO comments, keep simple
+8. ALWAYS return valid SQL (never just semicolon or placeholders like <YEAR>)
+9. When using ORDER BY with GROUP BY, MUST include column in SELECT
+10. Use AND not commas in WHERE clause
+11. For both imports and exports: WHERE Direction IN ('I', 'E')
+12. Use random() NOT RAND()
+13. NEVER use aggregates in WHERE clause - use HAVING instead
+14. For year placeholders, use actual years (2077-2082)
+15. When selecting Country with GROUP BY, MUST include GROUP BY Country
+
+EXAMPLES:
+
+Question: Total trade?
+SELECT SUM(Value) FROM trade;
+
+Question: Imports from India?
+SELECT SUM(Value) FROM trade WHERE Country = 'IN' AND Direction = 'I';
+
+Question: Wheat imports?
+SELECT SUM(Value) FROM trade WHERE Description LIKE '%wheat%' AND Direction = 'I';
+
+Question: Top 5 countries?
+SELECT Country, SUM(Value) FROM trade GROUP BY Country ORDER BY SUM(Value) DESC LIMIT 5;
+
+Question: Trade in 2080?
+SELECT SUM(Value) FROM trade WHERE Year = 2080;
+
+Question: Imports in Ashoj month?
+SELECT SUM(Value) FROM trade WHERE Month = 6 AND Direction = 'I';
+
+Question: Gold from UAE?
+SELECT SUM(Value) FROM trade WHERE Country = 'AE' AND Description LIKE '%gold%';
+
+Question: Monthly imports in 2081?
+SELECT Month, SUM(Value) FROM trade WHERE Year = 2081 AND Direction = 'I' GROUP BY Month ORDER BY Month;
+
+Question: Both imports and exports?
+SELECT SUM(Value) FROM trade WHERE Direction IN ('I', 'E');
+
+Question:

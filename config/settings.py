@@ -12,7 +12,18 @@ LOGS_DIR = PROJECT_ROOT / "logs"
 PROMPTS_DIR = PROJECT_ROOT / "prompts"
 
 # Data source
-DATA_CSV_PATH = PROJECT_ROOT.parent / "done_des.csv"
+# RAG system configuration
+
+# Paths
+BASE_DIR = Path(__file__).parent.parent
+DATA_DIR = BASE_DIR / "data"
+LOGS_DIR = BASE_DIR / "logs"
+MODELS_DIR = BASE_DIR / "models"
+
+# Data
+DATA_CSV_PATH = DATA_DIR / "done_des.csv"
+DUCKDB_PATH = ":memory:"
+TABLE_NAME = "trade"
 
 # Model configurations
 MISTRAL_MODEL = "mistralai/Mistral-7B-Instruct-v0.2"
@@ -22,25 +33,23 @@ LLAMA_MODEL = "meta-llama/Llama-3.2-1B-Instruct"
 LOAD_IN_4BIT = True
 DEVICE_MAP = "auto"  # Automatically use GPU
 
-# Database settings
-DUCKDB_PATH = ":memory:"  # In-memory database
-TABLE_NAME = "trade"
-
-# Generation settings
-SQL_MAX_TOKENS = 200
-FORMAT_MAX_TOKENS = 150
-TEMPERATURE = 0  # Deterministic for consistency
+# Model settings
+SQL_MAX_TOKENS = 256
+FORMAT_MAX_TOKENS = 512
+SQL_TEMPERATURE = 0.0  # Deterministic for SQL generation
+FORMAT_TEMPERATURE = 0.7  # Creative for natural responses
+TEMPERATURE = 0.7  # Legacy, use SQL_TEMPERATURE or FORMAT_TEMPERATURE
 
 # Query settings
-MAX_QUERY_TIMEOUT = 30  # seconds
-DEFAULT_LIMIT = 1000  # Default row limit for safety
+MAX_QUERY_TIMEOUT = 30
+DEFAULT_LIMIT = 1000
 
 # Logging
 LOG_QUERIES = True
 LOG_ERRORS = True
 LOG_PERFORMANCE = True
 
-# Create directories if they don't exist
+# Create directories
 DATA_DIR.mkdir(exist_ok=True)
 LOGS_DIR.mkdir(exist_ok=True)
-PROMPTS_DIR.mkdir(exist_ok=True)
+MODELS_DIR.mkdir(exist_ok=True)

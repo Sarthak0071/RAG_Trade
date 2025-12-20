@@ -1,6 +1,7 @@
-# Core ML dependencies - Tested for Python 3.11, Windows, CUDA 11.8
+# Core ML dependencies - Tested for Python 3.11, Windows,# Core ML dependencies
 ctransformers[cuda]==0.2.27
 huggingface-hub==0.26.2
+groq==0.11.0
 
 # Database
 duckdb==1.1.3
@@ -14,6 +15,7 @@ pandas==2.2.3
 numpy==1.26.4
 tqdm==4.67.1
 python-dotenv==1.0.1
+
 
 # Note: ctransformers has pre-built wheels for Windows + CUDA
 # Install with: pip install ctransformers[cuda]

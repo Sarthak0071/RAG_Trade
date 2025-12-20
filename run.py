@@ -66,5 +66,3 @@ Answer in simple words:"""
 if __name__ == "__main__":
     main()
 
-
-

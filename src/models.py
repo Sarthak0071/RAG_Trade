@@ -1,78 +1,131 @@
-# GGUF model loading and inference using ctransformers
+```python
+"""
+GGUF model loading and inference using ctransformers.
+
+This module handles loading quantized GGUF models for:
+- SQL generation (Mistral-7B)
+- Response formatting (TinyLlama-1.1B)
+"""
 
 from ctransformers import AutoModelForCausalLM
 from pathlib import Path
 from typing import Optional
 from config.settings import SQL_MAX_TOKENS, FORMAT_MAX_TOKENS, TEMPERATURE
 
+
 class ModelLoader:
-    # Manages loading and inference for GGUF quantized models
+    """Manages loading and inference for GGUF quantized models."""
     
     def __init__(self):
+        """Initialize model loader with empty model slots."""
         self.sql_model = None
-        self.format_model = None
+        self.formatter_model = None
         self.models_dir = Path("models")
     
-    def load_sql_generator(self, model_path: Optional[str] = None) -> None:
-        # Load Mistral-7B GGUF model for SQL generation
-        if model_path is None:
-            model_path = self.models_dir / "mistral_sql" / "mistral-7b-instruct-v0.2.Q4_K_M.gguf"
+    def load_sql_generator(self) -> None:
+        """
+        Load Mistral-7B GGUF model for SQL generation.
         
-        model_path = Path(model_path)
+        Raises:
+            FileNotFoundError: If model file not found.
+        """
+        if self.sql_model is not None:
+            return
+        
+        model_path = self.models_dir / "mistral_sql" / "mistral-7b-instruct-v0.2.Q4_K_M.gguf"
+        
         if not model_path.exists():
-            raise FileNotFoundError(f"Model not found: {model_path}\nRun download_models.py first")
+            raise FileNotFoundError(f"SQL model not found: {model_path}")
         
         print(f"Loading SQL generator from {model_path}...")
+        
         self.sql_model = AutoModelForCausalLM.from_pretrained(
-            str(model_path),
+            str(model_path.parent),
+            model_file=model_path.name,
             model_type="mistral",
-            gpu_layers=50,
-            context_length=2048
+            gpu_layers=-1,  # Use all GPU layers
+            context_length=1024
         )
+        
         print("SQL generator loaded")
     
-    def load_response_formatter(self, model_path: Optional[str] = None) -> None:
-        # Load TinyLlama GGUF model for response formatting
-        if model_path is None:
-            model_path = self.models_dir / "tinyllama_formatter" / "tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+    def load_response_formatter(self) -> None:
+        """
+        Load TinyLlama GGUF model for response formatting.
         
-        model_path = Path(model_path)
+        Raises:
+            FileNotFoundError: If model file not found.
+        """
+        if self.formatter_model is not None:
+            return
+        
+        model_path = self.models_dir / "tinyllama" / "tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+        
         if not model_path.exists():
-            raise FileNotFoundError(f"Model not found: {model_path}\nRun download_models.py first")
+            raise FileNotFoundError(f"Formatter model not found: {model_path}")
         
         print(f"Loading response formatter from {model_path}...")
-        self.format_model = AutoModelForCausalLM.from_pretrained(
-            str(model_path),
+        
+        self.formatter_model = AutoModelForCausalLM.from_pretrained(
+            str(model_path.parent),
+            model_file=model_path.name,
             model_type="llama",
-            gpu_layers=50,
-            context_length=2048
+            gpu_layers=-1,  # Use all GPU layers
+            context_length=1024
         )
+        
         print("Response formatter loaded")
     
     def generate_sql(self, prompt: str) -> str:
-        # Generate SQL query from natural language prompt
-        if not self.sql_model:
-            raise RuntimeError("SQL model not loaded")
+        """
+        Generate SQL query from natural language prompt.
+        
+        Args:
+            prompt: Natural language question with schema context.
+            
+        Returns:
+            Generated SQL query string.
+            
+        Raises:
+            RuntimeError: If SQL model not loaded.
+        """
+        if self.sql_model is None:
+            raise RuntimeError("SQL model not loaded. Call load_sql_generator() first")
         
         response = self.sql_model(
             prompt,
-            max_new_tokens=SQL_MAX_TOKENS,
-            temperature=TEMPERATURE,
-            stop=["\n\n", "</s>"]
+            max_new_tokens=150,
+            temperature=0.2,  # Lower for consistency
+            top_p=0.9,
+            repetition_penalty=1.15,
+            stop=["\n\nQuestion:", "Q:"]
         )
         
         return response.strip()
     
     def format_response(self, prompt: str) -> str:
-        # Format query results into natural language response
-        if not self.format_model:
-            raise RuntimeError("Format model not loaded")
+        """
+        Format query results into natural language response.
         
-        response = self.format_model(
+        Args:
+            prompt: Results with formatting instructions.
+            
+        Returns:
+            Formatted natural language response.
+            
+        Raises:
+            RuntimeError: If formatter model not loaded.
+        """
+        if self.formatter_model is None:
+            raise RuntimeError("Formatter model not loaded. Call load_response_formatter() first")
+        
+        response = self.formatter_model(
             prompt,
             max_new_tokens=FORMAT_MAX_TOKENS,
             temperature=TEMPERATURE,
-            stop=["</s>"]
+            top_p=0.95,
+            repetition_penalty=1.1,
+            stop=["\n\n"]
         )
         
         return response.strip()
