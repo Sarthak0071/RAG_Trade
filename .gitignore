@@ -17,14 +17,19 @@ ENV/
 
 # Logs
 logs/*.log
+*.env
 
 # Data
 data/*.db
 data/*.duckdb
 data/*.csv
 
-# Models (if downloaded locally)
+# Models
 models/
+
+# Scripts temp files
+scripts/*.csv
+scripts/*.log
 
 # Testing
 .pytest_cache/
@@ -34,3 +39,4 @@ htmlcov/
 # OS
 .DS_Store
 Thumbs.db
+

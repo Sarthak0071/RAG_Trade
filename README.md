@@ -1,57 +1,44 @@
 # Trade Data RAG System
 
-## Overview
-Smart question-answering system for Nepal trade data using local LLMs.
+Natural language query system for Nepal trade data.
 
-**Target:** 90% accuracy, 3-second response time
+## Setup
 
-## Architecture
-- **SQL Generator:** Mistral-7B (4-bit) - Natural language → SQL
-- **Database:** DuckDB - Fast query execution on done_des.csv
-- **Formatter:** Llama-3.2-1B (4-bit) - Results → Natural language
-- **GPU:** RTX 4060 (6GB) - Accelerated inference
-
-## Project Structure
-```
-rag_system/
-├── src/                    # Core source code
-├── tests/                  # pytest test suite
-├── prompts/                # Prompt templates
-├── logs/                   # Query logs
-├── data/                   # DuckDB database
-├── config/                 # Configuration
-├── requirements.txt        # Dependencies
-└── README.md              # This file
-```
-
-## Quick Start
-
-### Installation
 ```bash
 pip install -r requirements.txt
+pip install ctransformers[cuda]
+python scripts/download_models.py
 ```
 
-### Run
+## Run
+
 ```bash
 python run.py
 ```
 
-## Development Phases
-1. Setup - Install dependencies, load models
-2. SQL Generation - Comprehensive prompt engineering
-3. Execution - Safe query execution with validation
-4. Formatting - Clear responses with exact numbers
-5. Testing - 50+ test cases for 90% accuracy
+## Architecture
 
-## Testing
-```bash
-pytest tests/ -v
+- Mistral-7B (SQL generation)
+- TinyLlama-1.1B (response formatting)
+- DuckDB (760K trade records)
+
+## Structure
+
+```
+rag_system/
+├── models/           # Downloaded models
+├── tests/            # Test suite
+└── run.py            # Main entry
 ```
 
-## Performance
-- Response time: ~3 seconds (GPU)
-- Accuracy: 90%+ on test suite
-- Data: 760,233 trade records
+## Requirements
 
-## License
-Internal use only
+- Python 3.11
+- CUDA 11.8 (for GPU)
+- 6GB+ GPU memory
+
+## Documentation
+
+See `docs/` folder for detailed guides.
+
+
