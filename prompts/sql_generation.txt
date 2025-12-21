@@ -15,10 +15,15 @@ CRITICAL RULES:
 9. When using ORDER BY with GROUP BY, MUST include column in SELECT
 10. Use AND not commas in WHERE clause
 11. For both imports and exports: WHERE Direction IN ('I', 'E')
-12. Use random() NOT RAND()
+12. Use random() NOT RAND() - CRITICAL
 13. NEVER use aggregates in WHERE clause - use HAVING instead
 14. For year placeholders, use actual years (2077-2082)
 15. When selecting Country with GROUP BY, MUST include GROUP BY Country
+16. NO OFFSET, NO FETCH - use LIMIT only
+17. NO FLOOR, NO CEILING, NO ROUND in WHERE/HAVING
+18. NO OVER(), NO window functions - keep SQL simple
+19. For random sampling: ORDER BY random() LIMIT N
+20. For median/percentile: use AVG as approximation
 
 EXAMPLES:
 
@@ -48,5 +53,11 @@ SELECT Month, SUM(Value) FROM trade WHERE Year = 2081 AND Direction = 'I' GROUP 
 
 Question: Both imports and exports?
 SELECT SUM(Value) FROM trade WHERE Direction IN ('I', 'E');
+
+Question: Random 100 trades?
+SELECT * FROM trade ORDER BY random() LIMIT 100;
+
+Question: Countries we only import from?
+SELECT DISTINCT Country FROM trade WHERE Direction = 'I' AND Country NOT IN (SELECT DISTINCT Country FROM trade WHERE Direction = 'E');
 
 Question:

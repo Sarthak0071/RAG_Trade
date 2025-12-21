@@ -1,4 +1,4 @@
-```python
+
 """
 GGUF model loading and inference using ctransformers.
 
@@ -44,7 +44,11 @@ class ModelLoader:
             model_file=model_path.name,
             model_type="mistral",
             gpu_layers=-1,  # Use all GPU layers
-            context_length=1024
+            lib='cuda',  # Force CUDA backend
+            context_length=1024,
+            threads=8,  # Use more CPU threads
+            batch_size=512,  # Larger batch for faster processing
+            mlock=True  # Lock model in RAM for speed
         )
         
         print("SQL generator loaded")
@@ -71,6 +75,7 @@ class ModelLoader:
             model_file=model_path.name,
             model_type="llama",
             gpu_layers=-1,  # Use all GPU layers
+            lib='cuda',  # Force CUDA backend
             context_length=1024
         )
         
@@ -95,10 +100,11 @@ class ModelLoader:
         response = self.sql_model(
             prompt,
             max_new_tokens=150,
-            temperature=0.2,  # Lower for consistency
-            top_p=0.9,
+            temperature=0.25,  # Balanced for accuracy and speed
+            top_p=0.85,  # Slightly higher for better quality
             repetition_penalty=1.15,
-            stop=["\n\nQuestion:", "Q:"]
+            stop=["\n\nQuestion:", "Q:"],
+            threads=8
         )
         
         return response.strip()

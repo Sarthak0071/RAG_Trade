@@ -102,8 +102,8 @@ ADDITIONAL_VARIETY_CASES = [
         "category": "units"
     },
     {
-        "question": "Total quantity in kg?",
-        "expected_sql": "SELECT SUM(Quantity) FROM trade WHERE Unit LIKE '%kg%';",
+        "question": "Total quantity imported?",
+        "expected_sql": "SELECT SUM(Quantity) FROM trade WHERE Direction = 'I';",
         "category": "units"
     },
     {
