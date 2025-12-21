@@ -87,3 +87,37 @@ Return ONLY the questions, one per line, no numbering.
         response = self.generate(prompt, temperature=0.8, max_tokens=2048)
         questions = [q.strip() for q in response.split('\n') if q.strip() and not q.strip().startswith('#')]
         return questions[:num_questions]
+    
+    def fix_sql(self, question: str, bad_sql: str, error_msg: str) -> str:
+        """
+        Use Groq to fix broken SQL - reuses Mistral's prompt + error context.
+        """
+        # Load Mistral's prompt
+        from pathlib import Path
+        prompt_path = Path(__file__).parent.parent / "prompts" / "sql_generation.txt"
+        with open(prompt_path, 'r', encoding='utf-8') as f:
+            base_prompt = f.read()
+        
+        # Add error context
+        fix_prompt = f"""{base_prompt}
+
+PREVIOUS ATTEMPT FAILED:
+SQL Generated: {bad_sql}
+Error: {error_msg}
+
+FIX THIS: The above SQL failed. Generate a corrected version that avoids this error.
+Keep it simple and follow ALL the rules above.
+
+User Question: {question}
+
+SQL:"""
+        
+        fixed_sql = self.generate(fix_prompt, temperature=0.1, max_tokens=300)
+        
+        # Extract SQL
+        if '```sql' in fixed_sql:
+            fixed_sql = fixed_sql.split('```sql')[1].split('```')[0].strip()
+        elif '```' in fixed_sql:
+            fixed_sql = fixed_sql.split('```')[1].split('```')[0].strip()
+        
+        return fixed_sql
