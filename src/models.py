@@ -63,7 +63,7 @@ class ModelLoader:
         if self.formatter_model is not None:
             return
         
-        model_path = self.models_dir / "tinyllama" / "tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+        model_path = self.models_dir / "tinyllama_formatter" / "tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
         
         if not model_path.exists():
             raise FileNotFoundError(f"Formatter model not found: {model_path}")
